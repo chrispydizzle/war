@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "incremental": true,
+    "lib": [
+      "es6",
+      "dom",
+      "esnext"
+    ],
+    "skipLibCheck": true,
+    "target": "es2018",
+    "module": "CommonJS",
+    "strict": true,
+    "importHelpers": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "allowJs": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "noUnusedLocals": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "baseUrl": "./",
+    "paths": {
+      "src": [
+        "./src"
+      ]
+    }
+  },
+  "include": [
+    "src",
+    "tests"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

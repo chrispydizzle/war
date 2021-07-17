@@ -1,0 +1,11 @@
+{
+  "name": "War",
+  "description": "Prepare for war",
+  "website": "https://this-means-war.herokuapp.com/",
+  "repository": "https://github.com/chrispydizzle/war",
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}
