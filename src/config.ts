@@ -9,3 +9,4 @@ function requireEnvVariable (name: string): string {
 
 export const DATABASE_URL = requireEnvVariable('DATABASE_URL') as string
 export const PORT = requireEnvVariable('PORT') as string
+export const NODE_ENV = process.env.NODE_ENV

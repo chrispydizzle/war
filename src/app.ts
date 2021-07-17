@@ -1,12 +1,15 @@
 /* eslint-disable import/first */
 import dotenv from 'dotenv'
 dotenv.config()
+import { NODE_ENV } from './config'
+if (NODE_ENV === 'PRODUCTION') require('newrelic')
 import Express, { NextFunction, Request, Response, Router } from 'express'
 import httpLogger from 'morgan'
 import compression from 'compression'
 import { json as jsonParser } from 'body-parser'
 import createPostgresConnection from './database/postgres_connect'
 import { Connection } from 'typeorm'
+import { battle } from './warzone/battle'
 
 const start = async () => {
   const app = Express()
@@ -20,20 +23,24 @@ const start = async () => {
   const postgresConnection = await createPostgresConnection()
 
   const router = Express.Router()
-  router.use('/game', GameRouter(router, postgresConnection))
+  router.use('/war', GameRouter(router, postgresConnection))
 
   process.on('unhandledRejection', (error: { stack: any }) => {
     console.error(error)
   })
 
+  app.use(router)
   return app
 }
-
 export default start
 
 export const GameRouter = (router: Router, connection: Connection) => {
-  const doCreateGame = (req: Request, res: Response, next: NextFunction) => {
-    // TODO: Create Game Logic
+  const doCreateGame = async (req: Request<number[]>, res: Response, next: NextFunction) => {
+    if (req.params && req.params.length !== 2) {
+      next()
+    }
+    const newGame = new battle(req.params)
+    newGame.begin()
     next()
   }
 
