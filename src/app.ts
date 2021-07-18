@@ -38,7 +38,7 @@ export default start
 
 export const GameRouter = (router: Router, connection: Connection) => {
   const doCreateGame = async (req: Request<{playerIds: number[]}>, res: Response, next: NextFunction) => {
-    if (req.params.playerIds.length > 0 && req.params.playerIds.length !== 2) {
+    if (req.body.playerIds.length > 0 && req.body.playerIds.length !== 2) {
       next('Wrong number of params')
     }
     const newGame = new battle(req.params.playerIds)
