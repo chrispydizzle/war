@@ -41,10 +41,10 @@ export const GameRouter = (router: Router, connection: Connection) => {
     if (req.body.playerIds.length > 0 && req.body.playerIds.length !== 2) {
       next('Wrong number of params')
     }
-    const newGame = new battle(req.params.playerIds)
+    const newGame = new battle(req.body.playerIds)
     const result = await newGame.run()
     const playerRepo = connection.manager.getRepository(Player)
-    const players = await playerRepo.find({ where: { id: In(req.params.playerIds) } })
+    const players = await playerRepo.find({ where: { id: In(req.body.playerIds) } })
     while (players.length < 2) {
       players.push(new Player())
     }
