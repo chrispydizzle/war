@@ -1,5 +1,3 @@
-require('dotenv')
-
 module.exports = [{
   name: 'default',
   type: 'postgres',
