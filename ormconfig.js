@@ -2,7 +2,6 @@ module.exports = [{
   name: 'default',
   type: 'postgres',
   url: process.env.DATABASE_URL,
-  ssl: true,
   cli: {
     migrationsDir: './src/database/migrations'
   },
@@ -11,5 +10,11 @@ module.exports = [{
   ],
   migrationsRun: true,
   logging: true,
-  entities: ['./src/database/entities/*.ts']
+  entities: ['./src/database/entities/*.ts'],
+  ssl: true,
+  extra: {
+    ssl: {
+      rejectUnauthorized: false
+    }
+  }
 }]
