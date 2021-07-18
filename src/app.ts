@@ -46,7 +46,10 @@ export const GameRouter = (router: Router, connection: Connection) => {
     const playerRepo = connection.manager.getRepository(Player)
     const players = await playerRepo.find({ where: { id: In(req.body.playerIds) } })
     while (players.length < 2) {
-      players.push(new Player())
+      const player = new Player()
+      player.lost_games = []
+      player.won_games = []
+      players.push(player)
     }
     const game = new Game()
     game.status = 'Done.'
