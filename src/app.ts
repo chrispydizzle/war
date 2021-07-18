@@ -20,7 +20,7 @@ const start = async () => {
   app.use(httpLogger('dev'))
   app.use(jsonParser())
 
-  const postgresConnection = await createPostgresConnection()
+  const postgresConnection = await createPostgresConnection({ ssl: { rejectUnauthorized: false } })
 
   const router = Express.Router()
   router.use('/war', GameRouter(router, postgresConnection))
