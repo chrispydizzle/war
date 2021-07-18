@@ -1,6 +1,25 @@
-POST http://localhost:80/api/item
+POST https://war-prod.herokuapp.com/war/create
 Content-Type: application/json
 
 {"playerIds": [1, 2]}
 
+###
+
+
+GET https://war-prod.herokuapp.com/war/stats/1
+Content-Type: application/json
+
+{"playerIds": [1, 2]}
+
+###
+
+GET https://war-prod.herokuapp.com/war/stats/2
+Content-Type: application/json
+
+{"playerIds": [1, 2]}
+
+###
+
+
+GET http://localhost:8082/war/stats/2
 ###

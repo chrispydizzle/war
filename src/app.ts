@@ -8,7 +8,7 @@ import httpLogger from 'morgan'
 import compression from 'compression'
 import { json as jsonParser } from 'body-parser'
 import createPostgresConnection from './database/postgres_connect'
-import { Connection } from 'typeorm'
+import { Connection, In } from 'typeorm'
 import { battle } from './warzone/battle'
 import Player from './database/entities/Player'
 import Game from './database/entities/Game'
@@ -37,13 +37,28 @@ const start = async () => {
 export default start
 
 export const GameRouter = (router: Router, connection: Connection) => {
-  const doCreateGame = async (req: Request<number[]>, res: Response, next: NextFunction) => {
-    if (req.params.length > 0 && req.params.length !== 2) {
+  const doCreateGame = async (req: Request<{playerIds: number[]}>, res: Response, next: NextFunction) => {
+    if (req.params.playerIds.length > 0 && req.params.playerIds.length !== 2) {
       next('Wrong number of params')
     }
-    const newGame = new battle(req.params)
+    const newGame = new battle(req.params.playerIds)
     const result = await newGame.run()
+    const playerRepo = connection.manager.getRepository(Player)
+    const players = await playerRepo.find({ where: { id: In(req.params.playerIds) } })
+    while (players.length < 2) {
+      players.push(new Player())
+    }
+    const game = new Game()
+    game.status = 'Done.'
+    players.forEach((p) => {
+      if (p.id === result.winner) {
+        p.won_games.push(game)
+      } else {
+        p.lost_games.push(game)
+      }
+    })
 
+    await playerRepo.save(players)
     res.json(result)
   }
 
@@ -53,7 +68,7 @@ export const GameRouter = (router: Router, connection: Connection) => {
     }
 
     const playerRepo = connection.manager.getRepository(Player)
-    const existingPlayer = await playerRepo.findByIds([req.params])
+    const existingPlayer = await playerRepo.find({ where: { id: req.params } })
     let winCount = 0
     if (existingPlayer.length === 0) {
       return next('Could not identify that player.')
