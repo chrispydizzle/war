@@ -2,6 +2,7 @@ module.exports = [{
   name: 'default',
   type: 'postgres',
   url: process.env.DATABASE_URL,
+  ssl: true,
   cli: {
     migrationsDir: './src/database/migrations'
   },
