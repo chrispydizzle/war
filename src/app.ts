@@ -10,6 +10,8 @@ import { json as jsonParser } from 'body-parser'
 import createPostgresConnection from './database/postgres_connect'
 import { Connection } from 'typeorm'
 import { battle } from './warzone/battle'
+import Player from './database/entities/Player'
+import Game from './database/entities/Game'
 
 const start = async () => {
   const app = Express()
@@ -36,17 +38,31 @@ export default start
 
 export const GameRouter = (router: Router, connection: Connection) => {
   const doCreateGame = async (req: Request<number[]>, res: Response, next: NextFunction) => {
-    if (req.params && req.params.length !== 2) {
-      next()
+    if (req.params.length > 0 && req.params.length !== 2) {
+      next('Wrong number of params')
     }
     const newGame = new battle(req.params)
-    newGame.begin()
-    next()
+    const result = await newGame.run()
+
+    res.json(result)
   }
 
-  const doGetPlayerStatus = (req: Request, res: Response, next: NextFunction) => {
-    // TODO: Get player status
-    next()
+  const doGetPlayerStatus = async (req: Request<number>, res: Response, next: NextFunction) => {
+    if (!connection.isConnected) {
+      return next('Error connecting to the database.')
+    }
+
+    const playerRepo = connection.manager.getRepository(Player)
+    const existingPlayer = await playerRepo.findByIds([req.params])
+    let winCount = 0
+    if (existingPlayer.length === 0) {
+      return next('Could not identify that player.')
+    }
+
+    const gameRepo = connection.manager.getRepository(Game)
+    winCount = await gameRepo.count({ where: { winnerId: existingPlayer[0].id } })
+
+    res.json({ id: existingPlayer[0].id, winCount })
   }
 
   router.post('/create', doCreateGame)

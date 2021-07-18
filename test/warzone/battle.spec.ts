@@ -5,9 +5,9 @@ import { card_type } from '../../src/warzone/card_type'
 describe('When battle is created', () => {
   it('defaults to computer players one and two if not provided', async () => {
     const bot = new battle([])
-    expect(bot.players.size === 2)
-    expect(bot.players.has(1))
-    expect(bot.players.has(2))
+    expect(bot.players.length).toEqual(2)
+    expect(bot.players[0].id).toEqual(1)
+    expect(bot.players[1].id).toEqual(2)
   })
 })
 
@@ -21,5 +21,14 @@ describe('When deck is created', () => {
     })
     expect(m.size).toEqual(13)
     m.forEach(c => expect(c).toEqual(4))
+  })
+})
+
+describe('When taking cards from the deck', () => {
+  const bo = new deck()
+  it('returns the expected numbers of cards', async () => {
+    const cards = bo.take(10)
+    expect(cards.length).toEqual(10)
+    expect(bo.cards.length).toEqual(42)
   })
 })

@@ -10,6 +10,15 @@ export class deck {
   }
 
   public take (cardCount: number) : card_type[] {
-    return this.cards.splice(0, cardCount)
+    const dealtCards: card_type[] = []
+    while (dealtCards.length < cardCount && this.cards.length > 0) {
+      const next = Math.floor(Math.random() * this.cards.length)
+      const card = this.cards.splice(next, 1) as card_type[]
+      if (card.length > 0) {
+        dealtCards.push(...card)
+      }
+    }
+
+    return dealtCards
   }
 }
