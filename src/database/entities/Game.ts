@@ -1,4 +1,4 @@
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm'
 import Player from './Player'
 
 @Entity('game')
@@ -9,11 +9,17 @@ export default class Game {
   @Column()
   status!: string
 
-  @ManyToOne(type => Player, player => player.won_games)
-  @JoinTable()
-  winner?: Player
+  @Column()
+  rounds!: number
 
-  @ManyToMany(type => Player, player => player.lost_games)
+  @Column()
+  wars!: number
+
+  @ManyToMany(type => Player, player => player.won_games, { cascade: true })
   @JoinTable()
-  loser?: Player
+  winner!: Player
+
+  @ManyToMany(type => Player, player => player.lost_games, { cascade: true })
+  @JoinTable()
+  loser!: Player
 }

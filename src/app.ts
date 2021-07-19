@@ -3,15 +3,12 @@ import dotenv from 'dotenv'
 dotenv.config()
 import { NODE_ENV } from './config'
 if (NODE_ENV === 'PRODUCTION') require('newrelic')
-import Express, { NextFunction, Request, Response, Router } from 'express'
+import Express from 'express'
 import httpLogger from 'morgan'
 import compression from 'compression'
 import { json as jsonParser } from 'body-parser'
 import createPostgresConnection from './database/postgres_connect'
-import { Connection } from 'typeorm'
-import { battle } from './warzone/battle'
-import Player from './database/entities/Player'
-import Game from './database/entities/Game'
+import { game } from './routing/game'
 
 const start = async () => {
   const app = Express()
@@ -25,7 +22,7 @@ const start = async () => {
   const postgresConnection = await createPostgresConnection({ ssl: { rejectUnauthorized: false } })
 
   const router = Express.Router()
-  router.use('/war', GameRouter(router, postgresConnection))
+  router.use('/war', game(router, postgresConnection))
 
   process.on('unhandledRejection', (error: { stack: any }) => {
     console.error(error)
@@ -35,58 +32,3 @@ const start = async () => {
   return app
 }
 export default start
-
-export const GameRouter = (router: Router, connection: Connection) => {
-  const doCreateGame = async (req: Request<{playerIds: number[]}>, res: Response, next: NextFunction) => {
-    if (req.body.playerIds.length > 0 && req.body.playerIds.length !== 2) {
-      next('Wrong number of params')
-    }
-    const newGame = new battle(req.body.playerIds)
-    const result = await newGame.run()
-    const playerRepo = connection.manager.getRepository(Player)
-    const players = await playerRepo.createQueryBuilder().andWhereInIds(req.body.playerIds)
-      .relation(Game, 'won_games')
-      .relation(Game, 'lost_games')
-      .execute()
-    while (players.length < 2) {
-      const player = new Player()
-      player.lost_games = []
-      player.won_games = []
-      players.push(player)
-    }
-    const game = new Game()
-    game.status = 'Done.'
-    players.forEach((p: Player) => {
-      if (p.id === result.winner) {
-        p.won_games.push(game)
-      } else {
-        p.lost_games.push(game)
-      }
-    })
-
-    await playerRepo.save(players)
-    res.json(result)
-  }
-
-  const doGetPlayerStatus = async (req: Request, res: Response, next: NextFunction) => {
-    if (!connection.isConnected) {
-      return next('Error connecting to the database.')
-    }
-
-    const playerRepo = connection.manager.getRepository(Player)
-    const existingPlayer = await playerRepo.find({ where: { id: req.params.playerId } })
-    let winCount = 0
-    if (existingPlayer.length === 0) {
-      return next('Could not identify that player.')
-    }
-
-    const gameRepo = connection.manager.getRepository(Game)
-    winCount = await gameRepo.count({ where: { winner: { id: existingPlayer[0].id } } })
-
-    res.json({ id: existingPlayer[0].id, winCount })
-  }
-
-  router.post('/create', doCreateGame)
-  router.get('/stats/:playerId', doGetPlayerStatus)
-  return router
-}

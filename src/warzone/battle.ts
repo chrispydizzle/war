@@ -1,41 +1,42 @@
 import { deck } from './deck'
-import { card_type } from './card_type'
+import { round_strategy, single, war } from './round'
+import { battler } from './battler'
+import { roundContext } from './roundContext'
+
+const DEAL_SIZE = 26
 
 export class battle {
-  players: { id: number, cards:card_type[]}[] = []
+  playerOne: battler
+  playerTwo: battler
   deck: deck = new deck()
+  automated: boolean;
 
-  constructor (playerIds: number[]) {
-    this.players[0] = { id: playerIds[0] || 1, cards: this.deck.take(26) }
-    this.players[1] = { id: playerIds[1] || 2, cards: this.deck.take(26) }
+  constructor (playerIds: number[], automated: boolean = true) {
+    this.automated = automated
+    this.playerOne = new battler(playerIds[0] || 1, this.deck.take(DEAL_SIZE))
+    this.playerTwo = new battler(playerIds[1] || 2, this.deck.take(DEAL_SIZE))
   }
 
   async run () {
-    const cardsInPlay : card_type[] = []
-    while (this.players[0].cards.length > 0 && this.players[1].cards.length > 0) {
-      let player0 = this.players[0].cards.pop() || 0
-      let player1 = this.players[1].cards.pop() || 0
-      cardsInPlay.push(player0, player1)
-      while (player0 === player1) {
-        cardsInPlay.push(this.players[0].cards.pop() || 0, this.players[1].cards.pop() || 0)
-        player0 = this.players[0].cards.pop() || 0
-        player1 = this.players[1].cards.pop() || 0
-        cardsInPlay.push(player0, player1)
+    const context = new roundContext(this.playerOne, this.playerTwo)
+    let round : round_strategy = new single()
+    while (context.playersHaveCards()) {
+      context.roundCount++
+      round.fire(context)
+      if (!context.roundWinner) {
+        console.log('war time')
+        context.warCount++
+        round = new war()
+        continue
       }
+      console.log(`'Round over - ${context.roundWinner.id} will take ${context.cardsInPlay}`)
+      context.roundWinner.take(context.cardsInPlay)
 
-      if (player1 > player0) {
-        this.players[1].cards.push(...cardsInPlay)
-      } else {
-        this.players[0].cards.push(...cardsInPlay)
-      }
-
-      cardsInPlay.length = 0
+      context.roundWinner = undefined
+      context.roundLoser = undefined
+      round = new single()
     }
 
-    if (this.players[0].cards.length > 0) {
-      return { winner: this.players[0].id, loser: this.players[1].id }
-    }
-
-    return { winner: this.players[1].id, loser: this.players[0].id }
+    return { winner: context.roundWinner, loser: context.roundLoser }
   }
 }
