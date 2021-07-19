@@ -6,5 +6,4 @@
 https://this-means-war.herokuapp.com/
 
 ## Production
-## Pre-prod 
 https://war-prod.herokuapp.com/
