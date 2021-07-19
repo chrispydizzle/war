@@ -23,8 +23,7 @@ You'll need a postgres db setup locally and configured in your .env file - the s
 
 I've hooked it up to coralogix and newrelic as part of my heroku CI pipeline, not sure how to make that accessible without handing over the keys to my heroku account but future plans include a demo of that and how it works. 
 
-As the prompt was for a rest API, to see anything more than the Hai page at the root you'd be best off looking at the requests here:
-demo/startGame.http
+As the prompt was for a rest API, to see anything more than the Hai page at the root you'd be best off looking at the sample post and get requests at [/demo/startGame.http](https://github.com/chrispydizzle/war/blob/main/demo/startGame.http)
 
 
 # Heroku CI 
