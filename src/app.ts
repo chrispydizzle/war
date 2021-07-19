@@ -9,6 +9,7 @@ import compression from 'compression'
 import { json as jsonParser } from 'body-parser'
 import createPostgresConnection from './database/postgres_connect'
 import { game } from './routing/game'
+import { reporting } from './routing/reporting'
 
 const start = async () => {
   const app = Express()
@@ -23,7 +24,7 @@ const start = async () => {
 
   const router = Express.Router()
   router.use('/war', game(router, postgresConnection))
-
+  router.use('/', reporting(router, postgresConnection))
   process.on('unhandledRejection', (error: { stack: any }) => {
     console.error(error)
   })

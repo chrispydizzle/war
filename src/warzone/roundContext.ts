@@ -9,6 +9,7 @@ export class roundContext {
   cardsInPlay: card_type[] = []
   roundWinner: battler | undefined
   roundLoser: battler | undefined
+
   constructor (p1: battler, p2: battler) {
     this.playerOne = p1
     this.playerTwo = p2
